@@ -1,33 +1,36 @@
 import { useEffect, useState } from 'react';
-import { generateDashboardData, generateScenarios } from './mock-data';
-import type { DashboardData, ScenarioSimulation } from './types';
+import { generateMockResponse } from './mock-data';
 
 /**
- * Hook for fetching dashboard data with realistic delay
+ * Hook for assistant AI responses with realistic delay
  */
-export function useDashboard(enabled: boolean = true) {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function useAssistant(message: string) {
+  const [data, setData] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!message.trim()) {
+      setData(null);
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
     const timer = setTimeout(() => {
       try {
-        const dashboardData = generateDashboardData();
-        setData(dashboardData);
+        const response = generateMockResponse(message);
+        setData(response);
         setError(null);
       } catch (err) {
-        setError('Failed to load dashboard data');
+        setError('Failed to generate response');
       } finally {
         setIsLoading(false);
       }
-    }, 1200);
+    }, 1500);
 
     return () => clearTimeout(timer);
-  }, [enabled]);
+  }, [message]);
 
   return { data, isLoading, error };
 }
@@ -35,13 +38,15 @@ export function useDashboard(enabled: boolean = true) {
 /**
  * Hook for file upload simulation
  */
-export function useFileUpload() {
+export function useUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const uploadFile = async (file: File): Promise<boolean> => {
     setIsUploading(true);
     setProgress(0);
+    setError(null);
 
     return new Promise((resolve) => {
       const interval = setInterval(() => {
@@ -56,116 +61,74 @@ export function useFileUpload() {
           return next;
         });
       }, 300);
+
+      setTimeout(() => {
+        if (isUploading) {
+          clearInterval(interval);
+          setIsUploading(false);
+          setError('Upload failed');
+          resolve(false);
+        }
+      }, 10000);
     });
   };
 
-  const reset = () => {
-    setIsUploading(false);
-    setProgress(0);
-  };
-
-  return { uploadFile, isUploading, progress, reset };
+  return { isUploading, progress, error, uploadFile };
 }
 
 /**
- * Hook for AI assistant responses with streaming simulation
+ * Hook for document status tracking
  */
-export function useAssistant() {
-  const [response, setResponse] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
+export function useDocumentStatus(documentId: string) {
+  const [status, setStatus] = useState<'pending' | 'processing' | 'completed' | 'failed'>('pending');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const generateResponse = async (message: string): Promise<void> => {
-    setIsStreaming(true);
-    setResponse('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStatus('completed');
+      setIsLoading(false);
+    }, 2000);
 
-    const responses: Record<string, string> = {
-      'Hello': 'Hello! I&apos;m your FinTwin AI assistant. I&apos;m here to help you optimize your financial strategy.',
-      'advice': 'Based on your financial profile, I recommend focusing on portfolio rebalancing and tax optimization. Your current allocation has drifted from your target risk level.',
-      'risk': 'Your overall risk score is 58/100, indicating a moderate risk tolerance. Your portfolio is well-diversified, though you might consider increasing your bond allocation slightly.',
-      'default': 'I&apos;m here to help with your financial planning, portfolio analysis, and personalized recommendations. What would you like to explore today?',
-    };
+    return () => clearTimeout(timer);
+  }, [documentId]);
 
-    const key = Object.keys(responses).find((k) =>
-      message.toLowerCase().includes(k.toLowerCase())
-    );
-    const fullResponse = responses[key || 'default'];
-
-    // Simulate streaming
-    for (let i = 0; i < fullResponse.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 15));
-      setResponse(fullResponse.slice(0, i + 1));
-    }
-
-    setIsStreaming(false);
-  };
-
-  const reset = () => {
-    setResponse('');
-    setIsStreaming(false);
-  };
-
-  return { generateResponse, response, isStreaming, reset };
+  return { status, isLoading };
 }
 
 /**
- * Hook for scenario simulation
+ * Hook for simulation runs
  */
-export function useScenarioSimulation() {
-  const [scenarios, setScenarios] = useState<ScenarioSimulation[]>([]);
+export function useSimulation(scenarioId: string | null) {
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(
-    null
-  );
+  const [error, setError] = useState<string | null>(null);
 
-  const loadScenarios = async () => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    const generatedScenarios = generateScenarios();
-    setScenarios(generatedScenarios);
-    setSelectedScenarioId(generatedScenarios[0]?.id || null);
-    setIsLoading(false);
-  };
-
-  const getSelectedScenario = () =>
-    scenarios.find((s) => s.id === selectedScenarioId);
-
-  return {
-    scenarios,
-    selectedScenarioId,
-    setSelectedScenarioId,
-    getSelectedScenario,
-    isLoading,
-    loadScenarios,
-  };
-}
-
-/**
- * Hook for simulating file processing with progress
- */
-export function useFileProcessing() {
-  const [progress, setProgress] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-
-  const startProcessing = async () => {
-    setIsProcessing(true);
-    setProgress(0);
-    setIsComplete(false);
-
-    for (let i = 0; i <= 100; i += 5) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setProgress(i);
+  useEffect(() => {
+    if (!scenarioId) {
+      setData(null);
+      return;
     }
 
-    setIsComplete(true);
-    setIsProcessing(false);
-  };
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      try {
+        const result = {
+          scenario: scenarioId,
+          projectedImpact: { savingsGain: 5000 },
+          risks: ['Possible lifestyle inflation'],
+          recommendation: 'Proceed with caution',
+        };
+        setData(result);
+        setError(null);
+      } catch (err) {
+        setError('Simulation failed');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 1500);
 
-  const reset = () => {
-    setProgress(0);
-    setIsProcessing(false);
-    setIsComplete(false);
-  };
+    return () => clearTimeout(timer);
+  }, [scenarioId]);
 
-  return { progress, isProcessing, isComplete, startProcessing, reset };
+  return { data, isLoading, error };
 }

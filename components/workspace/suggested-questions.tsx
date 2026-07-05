@@ -1,0 +1,38 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { suggestedQuestions } from '@/lib/mock-data';
+
+interface SuggestedQuestionsProps {
+  onQuestionClick: (question: string) => void;
+}
+
+export function SuggestedQuestions({ onQuestionClick }: SuggestedQuestionsProps) {
+  const questions = suggestedQuestions();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.2 }}
+    >
+      <p className="text-sm text-muted-foreground mb-4">Suggested questions:</p>
+      <div className="flex flex-wrap gap-2">
+        {questions.map((question, idx) => (
+          <motion.button
+            key={question}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.3 + idx * 0.05 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onQuestionClick(question)}
+            className="px-4 py-2 rounded-full bg-secondary/50 border border-border/40 text-sm text-foreground hover:bg-secondary hover:border-border/60 transition-all"
+          >
+            {question}
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}

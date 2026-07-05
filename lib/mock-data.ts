@@ -1,236 +1,225 @@
 import type {
   User,
-  FinancialSnapshot,
-  RiskProfile,
-  AssetAllocation,
-  Recommendation,
-  PortfolioMetric,
-  ScenarioSimulation,
-  DashboardData,
+  ChatMessage,
+  FinancialSummary,
+  RiskMetrics,
+  QuickInsight,
+  ScenarioOption,
+  SimulationResult,
 } from './types';
 
 export const generateUser = (): User => ({
   id: 'user-123',
-  email: 'alex@example.com',
-  name: 'Alex Johnson',
-  company: 'Tech Innovations Inc.',
-  role: 'Chief Technology Officer',
+  email: 'demo@example.com',
+  name: 'Omkar',
 });
 
-export const generateFinancialSnapshot = (): FinancialSnapshot => ({
-  totalAssets: 1250000,
-  totalLiabilities: 285000,
-  netWorth: 965000,
-  monthlyIncome: 18500,
-  monthlyExpenses: 8200,
-  savingsRate: 0.556,
-  liquidAssets: 185000,
-  investedAssets: 780000,
+export const generateFinancialSummary = (): FinancialSummary => ({
+  monthlyIncome: 8500,
+  monthlyExpenses: 3200,
+  monthlySavings: 5300,
+  healthScore: 78,
+  totalDebt: 45000,
+  monthlyDebtPayment: 1200,
 });
 
-export const generateRiskProfile = (): RiskProfile => ({
-  overallRisk: 58,
-  marketRisk: 65,
-  concentrationRisk: 42,
-  liquidityRisk: 35,
-  inflationRisk: 52,
-  riskTolerance: 'moderate',
+export const generateRiskMetrics = (): RiskMetrics => ({
+  overallRisk: 62,
+  riskScore: 'Moderate',
+  recommendations: [
+    'Consider diversifying your investments across more sectors',
+    'Build an emergency fund covering 6 months of expenses',
+    'Review your insurance coverage for gaps',
+  ],
 });
 
-export const generateAssetAllocation = (): AssetAllocation[] => [
+export const generateQuickInsights = (): QuickInsight[] => [
   {
-    category: 'Stocks (US)',
-    percentage: 38,
-    value: 298200,
-    color: '#8b5cf6',
+    id: 'insight-1',
+    type: 'snapshot',
+    title: 'Financial Snapshot',
+    description: 'View your financial overview at a glance',
   },
   {
-    category: 'International Stocks',
-    percentage: 18,
-    value: 140700,
-    color: '#3b82f6',
+    id: 'insight-2',
+    type: 'risk',
+    title: 'Risk Analysis',
+    description: 'Understanding your financial risks',
   },
   {
-    category: 'Bonds',
-    percentage: 22,
-    value: 172700,
-    color: '#06b6d4',
+    id: 'insight-3',
+    type: 'recommendation',
+    title: 'AI Recommendations',
+    description: 'Personalized actions to improve your finances',
   },
   {
-    category: 'Real Estate',
-    percentage: 15,
-    value: 117450,
-    color: '#10b981',
+    id: 'insight-4',
+    type: 'document',
+    title: 'Recent Documents',
+    description: 'Bank Statement, Salary Slip, Loan Statement',
   },
   {
-    category: 'Cash & Equivalents',
-    percentage: 7,
-    value: 54950,
-    color: '#6b7280',
+    id: 'insight-5',
+    type: 'scenario',
+    title: 'Run Scenario',
+    description: 'Simulate financial scenarios',
   },
 ];
 
-export const generateRecommendations = (): Recommendation[] => [
+export const generateScenarioOptions = (): ScenarioOption[] => [
   {
-    id: 'rec-1',
-    title: 'Rebalance Portfolio',
-    description:
-      'Your stock allocation has drifted above target. Consider rebalancing to maintain your risk profile.',
-    impact: 'high',
-    category: 'Portfolio Management',
-    estimatedSavings: 2400,
-    priority: 1,
+    id: 'scenario-1',
+    name: 'Buy Vehicle',
+    description: 'Simulate purchasing a car',
   },
   {
-    id: 'rec-2',
-    title: 'Optimize Tax Strategy',
-    description:
-      'Tax-loss harvesting opportunities available in your taxable accounts to reduce tax burden.',
-    impact: 'high',
-    category: 'Tax Planning',
-    estimatedSavings: 3800,
-    priority: 2,
+    id: 'scenario-2',
+    name: 'New Loan',
+    description: 'Take out a personal loan',
   },
   {
-    id: 'rec-3',
-    title: 'Increase Emergency Fund',
-    description:
-      'Current emergency fund covers 2.8 months. Consider building to 6 months of expenses.',
-    impact: 'medium',
-    category: 'Financial Planning',
-    estimatedSavings: 0,
-    priority: 2,
+    id: 'scenario-3',
+    name: 'Salary Increase',
+    description: 'Get a 10% salary increase',
   },
   {
-    id: 'rec-4',
-    title: 'Review Insurance Coverage',
-    description:
-      'Based on your assets, consider increasing life and disability insurance coverage.',
-    impact: 'medium',
-    category: 'Risk Management',
-    estimatedSavings: 1200,
-    priority: 3,
+    id: 'scenario-4',
+    name: 'Increase Savings',
+    description: 'Boost monthly savings',
   },
   {
-    id: 'rec-5',
-    title: 'Automate Investing',
-    description:
-      'Set up automatic monthly investments to dollar-cost average and reduce market timing risk.',
-    impact: 'low',
-    category: 'Investing',
-    estimatedSavings: 0,
-    priority: 3,
+    id: 'scenario-5',
+    name: 'Increase Investments',
+    description: 'Allocate more to investments',
   },
 ];
 
-export const generatePortfolioMetrics = (): PortfolioMetric[] => {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  const baseValue = 900000;
-
-  return months.map((month, index) => ({
-    date: `${month} 2024`,
-    value: Math.round(baseValue * (1 + (index * 0.015 + (Math.random() - 0.5) * 0.02))),
-    return: index === 0 ? 0 : parseFloat((((index * 1.5 + (Math.random() - 0.5) * 2.5) / 100).toFixed(4))),
-  }));
-};
-
-export const generateScenarios = (): ScenarioSimulation[] => {
-  const baseWorth = 965000;
-  const years = 30;
-
-  const generateProjection = (
-    annualReturn: number,
-    inflation: number,
-    savingsIncrease: number
-  ) => {
-    const projections = [];
-    let currentWorth = baseWorth;
-    let currentSavings = 10300;
-
-    for (let year = 0; year <= years; year++) {
-      projections.push({
-        year,
-        netWorth: Math.round(currentWorth),
-        investedAssets: Math.round(currentWorth * 0.81),
-        liquidAssets: Math.round(currentWorth * 0.19),
-      });
-
-      currentWorth =
-        currentWorth * (1 + annualReturn) +
-        currentSavings * ((1 + savingsIncrease) ** year - 1);
-    }
-
-    return projections;
+export const generateSimulationResult = (scenario: string): SimulationResult => {
+  const scenarioData: Record<string, SimulationResult> = {
+    'Buy Vehicle': {
+      scenario: 'Buy Vehicle',
+      projectedImpact: {
+        monthlyPayment: 450,
+        newNetWorth: -45000,
+      },
+      risks: [
+        'Reduced emergency fund cushion',
+        'Increased monthly debt obligations',
+      ],
+      recommendation:
+        'Consider waiting 6 months to build savings first, then purchase with a shorter loan term.',
+    },
+    'Salary Increase': {
+      scenario: 'Salary Increase (10%)',
+      projectedImpact: {
+        savingsGain: 8500,
+      },
+      risks: ['Lifestyle inflation risk'],
+      recommendation:
+        'Allocate 50% of increase to investments and 50% to increased savings rate.',
+    },
   };
 
-  return [
-    {
-      id: 'scenario-conservative',
-      name: 'Conservative',
-      assumptions: {
-        annualReturn: 0.055,
-        inflation: 0.025,
-        savingsIncrease: 0.02,
-      },
-      projections: generateProjection(0.055, 0.025, 0.02),
-      result: {
-        finalNetWorth: Math.round(baseWorth * 3.2),
-        totalReturn: 220,
-        yearsToGoal: 18,
-      },
-    },
-    {
-      id: 'scenario-moderate',
-      name: 'Moderate',
-      assumptions: {
-        annualReturn: 0.075,
-        inflation: 0.025,
-        savingsIncrease: 0.03,
-      },
-      projections: generateProjection(0.075, 0.025, 0.03),
-      result: {
-        finalNetWorth: Math.round(baseWorth * 5.1),
-        totalReturn: 410,
-        yearsToGoal: 14,
-      },
-    },
-    {
-      id: 'scenario-aggressive',
-      name: 'Aggressive',
-      assumptions: {
-        annualReturn: 0.095,
-        inflation: 0.025,
-        savingsIncrease: 0.04,
-      },
-      projections: generateProjection(0.095, 0.025, 0.04),
-      result: {
-        finalNetWorth: Math.round(baseWorth * 8.2),
-        totalReturn: 720,
-        yearsToGoal: 11,
-      },
-    },
-  ];
+  return (
+    scenarioData[scenario] || {
+      scenario,
+      projectedImpact: {},
+      risks: [],
+      recommendation: 'Consult with a financial advisor for personalized guidance.',
+    }
+  );
 };
 
-export const generateDashboardData = (): DashboardData => ({
-  user: generateUser(),
-  financialSnapshot: generateFinancialSnapshot(),
-  riskProfile: generateRiskProfile(),
-  assetAllocation: generateAssetAllocation(),
-  recommendations: generateRecommendations(),
-  portfolioMetrics: generatePortfolioMetrics(),
-  scenarios: generateScenarios(),
-});
+export const generateWelcomeMessage = (userName: string): string => {
+  return `Hi ${userName}.
+
+I've completed the analysis of your uploaded financial documents.
+
+Here's what I found:
+
+**Income** - $8,500/month
+**Expenses** - $3,200/month  
+**Savings** - $5,300/month
+**Health Score** - 78/100
+**Debt** - $45,000 total
+**Cash Flow** - Strong positive cash flow
+
+I also discovered several opportunities to improve your finances. What would you like to explore?`;
+};
+
+export const suggestedQuestions = (): string[] => [
+  'Explain My Risk Score',
+  'Can I Buy a Car?',
+  'Reduce My Debt',
+  'Increase My Savings',
+  'Show Spending Analysis',
+  'Retirement Planning',
+];
+
+export const generateAgentWorkflowSteps = () => [
+  { id: 'step-1', title: 'Reading Financial Profile' },
+  { id: 'step-2', title: 'Retrieving Financial Memory' },
+  { id: 'step-3', title: 'Running Financial Analysis' },
+  { id: 'step-4', title: 'Validating Recommendation' },
+  { id: 'step-5', title: 'Preparing Response' },
+];
+
+export const generateMockResponse = (question: string): string => {
+  const responses: Record<string, string> = {
+    'Explain My Risk Score': `Your risk score of 62/100 indicates a **moderate risk profile**. This means:
+
+- You have reasonable diversification across different asset types
+- Your debt levels are manageable relative to your income
+- You have some exposure to market volatility
+
+**Key Areas:**
+- Market exposure is solid but could be more diversified internationally
+- Your emergency fund is adequate but could be larger
+- Insurance coverage has some gaps
+
+**Recommendation:** Consider rebalancing to reduce concentration risk and building 3-6 months of emergency savings.`,
+
+    'Can I Buy a Car?': `Yes, you can afford to buy a car, but with some considerations:
+
+**Your Financial Capacity:**
+- Monthly savings: $5,300
+- Total debt: $45,000
+- Monthly debt payment: $1,200
+
+**Car Purchase Scenarios:**
+- **Budget Option** ($25,000): $450/month payment - minimal impact
+- **Premium Option** ($45,000): $825/month payment - reduces savings to $4,475
+
+**My Recommendation:** You have the capacity, but I'd suggest:
+1. Wait 3-6 months to build additional emergency savings
+2. Keep total monthly debt payments under 35% of income (you're at 14% - good position)
+3. Look for a 5-7 year loan to minimize interest costs`,
+
+    'Reduce My Debt': `Based on your financial profile, here's a debt reduction strategy:
+
+**Current Situation:**
+- Total Debt: $45,000
+- Monthly Payment: $1,200
+- Debt-to-Income Ratio: 14% (healthy)
+
+**Aggressive Payoff Strategy (3-4 years):**
+- Increase payments to $1,800/month (use $600 from your $5,300 monthly savings)
+- Total interest saved: ~$8,500
+- New payoff date: 30 months
+
+**Conservative Strategy (5-6 years):**
+- Keep current $1,200/month payments
+- Use surplus savings for investments
+- Build wealth while managing debt
+
+**My Recommendation:** Given your strong cash flow, I'd suggest the aggressive approach. You'd be debt-free in under 3 years while maintaining a healthy emergency fund.`,
+
+    default: `That's a great question. Based on your current financial situation, here's what I found:
+
+Your monthly savings of $5,300 is excellent. This gives you significant flexibility for financial planning. The key is to align your goals with your risk tolerance and time horizon.
+
+Would you like me to dive deeper into any specific area, such as investment strategy, debt management, or retirement planning?`,
+  };
+
+  return responses[question] || responses['default'];
+};

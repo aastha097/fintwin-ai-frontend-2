@@ -1,26 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Landing } from '@/components/landing';
 import { Login } from '@/components/login';
 import { Upload } from '@/components/upload';
 import { Processing } from '@/components/processing';
-import { Dashboard } from '@/components/dashboard';
+import { AIWorkspace } from '@/components/ai-workspace';
 import { useAuthStore } from '@/lib/store';
 
-type AppState = 'landing' | 'login' | 'upload' | 'processing' | 'dashboard';
+type AppState = 'landing' | 'login' | 'upload' | 'processing' | 'workspace';
 
 export default function Home() {
-  const { isLoggedIn } = useAuthStore();
-  const [appState, setAppState] = useState<AppState>(() => {
-    return isLoggedIn ? 'dashboard' : 'landing';
-  });
+  const { isLoggedIn, logout } = useAuthStore();
+  const [appState, setAppState] = useState<AppState>('landing');
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize state based on auth status
+  useEffect(() => {
+    setAppState(isLoggedIn ? 'workspace' : 'landing');
+    setMounted(true);
+  }, [isLoggedIn]);
+
+  // Prevent rendering until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   const handleNavigate = (state: AppState) => {
     setAppState(state);
   };
 
   const handleLogout = () => {
+    logout();
     setAppState('landing');
   };
 
@@ -44,12 +55,12 @@ export default function Home() {
 
       {appState === 'processing' && (
         <Processing
-          onComplete={() => handleNavigate('dashboard')}
+          onComplete={() => handleNavigate('workspace')}
         />
       )}
 
-      {appState === 'dashboard' && (
-        <Dashboard
+      {appState === 'workspace' && (
+        <AIWorkspace
           onLogout={handleLogout}
         />
       )}

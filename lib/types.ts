@@ -3,99 +3,74 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  company?: string;
-  role?: string;
 }
 
-// File Upload
-export interface UploadedFile {
+// Chat & Conversation
+export interface ChatMessage {
   id: string;
-  name: string;
-  type: 'financial_statement' | 'bank_data' | 'tax_return';
-  uploadedAt: Date;
-  size: number;
-  status: 'processing' | 'completed' | 'failed';
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    agentSteps?: AgentStep[];
+  };
+}
+
+export interface AgentStep {
+  id: string;
+  title: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  timestamp?: Date;
 }
 
 // Financial Data
-export interface FinancialSnapshot {
-  totalAssets: number;
-  totalLiabilities: number;
-  netWorth: number;
+export interface FinancialSummary {
   monthlyIncome: number;
   monthlyExpenses: number;
-  savingsRate: number;
-  liquidAssets: number;
-  investedAssets: number;
+  monthlySavings: number;
+  healthScore: number;
+  totalDebt: number;
+  monthlyDebtPayment: number;
 }
 
-export interface RiskProfile {
+export interface RiskMetrics {
   overallRisk: number; // 0-100
-  marketRisk: number;
-  concentrationRisk: number;
-  liquidityRisk: number;
-  inflationRisk: number;
-  riskTolerance: 'conservative' | 'moderate' | 'aggressive';
+  riskScore: string;
+  recommendations: string[];
 }
 
-export interface AssetAllocation {
-  category: string;
-  percentage: number;
-  value: number;
-  color: string;
-}
-
-export interface Recommendation {
+export interface QuickInsight {
   id: string;
+  type: 'snapshot' | 'risk' | 'recommendation' | 'document' | 'scenario';
   title: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
-  category: string;
-  estimatedSavings?: number;
-  priority: 1 | 2 | 3;
+  data?: any;
 }
 
-export interface PortfolioMetric {
-  date: string;
-  value: number;
-  return: number;
-}
-
-export interface ScenarioSimulation {
+// Scenario Simulation
+export interface ScenarioOption {
   id: string;
   name: string;
-  assumptions: {
-    annualReturn: number;
-    inflation: number;
-    savingsIncrease: number;
-  };
-  projections: Array<{
-    year: number;
-    netWorth: number;
-    investedAssets: number;
-    liquidAssets: number;
-  }>;
-  result: {
-    finalNetWorth: number;
-    totalReturn: number;
-    yearsToGoal: number;
-  };
+  description: string;
 }
 
-export interface DashboardData {
-  user: User;
-  financialSnapshot: FinancialSnapshot;
-  riskProfile: RiskProfile;
-  assetAllocation: AssetAllocation[];
-  recommendations: Recommendation[];
-  portfolioMetrics: PortfolioMetric[];
-  scenarios: ScenarioSimulation[];
+export interface SimulationResult {
+  scenario: string;
+  projectedImpact: {
+    monthlyPayment?: number;
+    newNetWorth?: number;
+    savingsGain?: number;
+  };
+  risks: string[];
+  recommendation: string;
 }
 
-// UI State
-export interface ToastNotification {
+// Workspace State
+export interface WorkspaceSession {
   id: string;
-  message: string;
-  type: 'success' | 'error' | 'info';
-  duration?: number;
+  userId: string;
+  documentsProcessed: string[];
+  conversationHistory: ChatMessage[];
+  currentSummary: FinancialSummary;
+  createdAt: Date;
 }
