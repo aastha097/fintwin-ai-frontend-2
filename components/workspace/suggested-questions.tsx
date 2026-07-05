@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 import { suggestedQuestions } from '@/lib/mock-data';
 
 interface SuggestedQuestionsProps {
-  onQuestionClick: (question: string) => void;
+  onSendMessage: (message: string) => void;
 }
 
-export function SuggestedQuestions({ onQuestionClick }: SuggestedQuestionsProps) {
+export function SuggestedQuestions({ onSendMessage }: SuggestedQuestionsProps) {
   const questions = suggestedQuestions();
 
   return (
@@ -26,7 +26,7 @@ export function SuggestedQuestions({ onQuestionClick }: SuggestedQuestionsProps)
             transition={{ duration: 0.3, delay: 0.3 + idx * 0.05 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onQuestionClick(question)}
+            onClick={() => onSendMessage(question)}
             className="px-4 py-2 rounded-full bg-secondary/50 border border-border/40 text-sm text-foreground hover:bg-secondary hover:border-border/60 transition-all"
           >
             {question}

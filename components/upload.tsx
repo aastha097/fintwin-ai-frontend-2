@@ -100,7 +100,8 @@ export function Upload({ onComplete }: UploadProps) {
     return 'financial_statement';
   };
 
-  const canProceed = uploadedFiles.length >= 1;
+  // Allow proceeding for demo (uploadedFiles.length >= 1 for production)
+  const canProceed = true;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card/10 to-background p-6">
