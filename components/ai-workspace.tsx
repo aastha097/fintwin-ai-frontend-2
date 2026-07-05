@@ -8,7 +8,7 @@ import { WelcomeSummary } from './workspace/welcome-summary';
 import { SuggestedQuestions } from './workspace/suggested-questions';
 import { ConversationThread } from './workspace/conversation-thread';
 import { AgentActivityTimeline } from './workspace/agent-activity-timeline';
-import { QuickInsightCards } from './workspace/quick-insight-cards';
+import { AIToolsRail } from './workspace/ai-tools-rail';
 import { ScenarioChips } from './workspace/scenario-chips';
 import { FollowUpSuggestions } from './workspace/follow-up-suggestions';
 import { useAssistant } from '@/lib/hooks';
@@ -28,20 +28,29 @@ export function AIWorkspace({ onLogout }: AIWorkspaceProps) {
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showActivityTimeline, setShowActivityTimeline] = useState(false);
+  const [welcomeSuggestionsUsed, setWelcomeSuggestionsUsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: assistantResponse } = useAssistant(inputValue);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 0);
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isProcessing]);
+  }, [messages, isProcessing, showActivityTimeline]);
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || isProcessing) return;
+
+    // Mark welcome suggestions as used
+    if (messages.length === 0) {
+      setWelcomeSuggestionsUsed(true);
+    }
 
     // Add user message
     const userMessage: MessageWithMetadata = {
@@ -55,6 +64,7 @@ export function AIWorkspace({ onLogout }: AIWorkspaceProps) {
     setInputValue('');
     setIsProcessing(true);
     setShowActivityTimeline(true);
+    inputRef.current?.focus();
 
     // Simulate agent workflow
     await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -143,13 +153,13 @@ Rebalance toward bonds and diversify across sectors to reduce volatility.`;
       ];
     }
 
-    // Add assistant message
+    // Add assistant message with ONLY ONE follow-up suggestion block
     const assistantMessage: MessageWithMetadata = {
       id: `msg-${Date.now() + 1}`,
       role: 'assistant',
       content: responseContent,
       timestamp: new Date(),
-      followUpSuggestions,
+      followUpSuggestions: followUpSuggestions.length > 0 ? followUpSuggestions : undefined,
       showScenarioChips: showScenarios,
     };
 
@@ -176,132 +186,128 @@ Rebalance toward bonds and diversify across sectors to reduce volatility.`;
       {/* Header */}
       <WorkspaceHeader onLogout={onLogout} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">
-        <div className="max-w-4xl mx-auto h-full flex flex-col px-6 py-8">
-          {/* Welcome Summary - Only show if no messages */}
-          <AnimatePresence>
-            {messages.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
-                <WelcomeSummary />
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Main Content Area with Left Rail */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left AI Tools Rail - Fixed, always visible */}
+        <AIToolsRail onToolClick={handleSendMessage} isProcessing={isProcessing} />
 
-          {/* Suggested Questions - Always visible below summary */}
-          <AnimatePresence>
-            {messages.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mt-6"
-              >
-                <SuggestedQuestions onSendMessage={handleSendMessage} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Conversation */}
-          <div className="flex-1 overflow-y-auto mt-8 mb-6">
-            {messages.length > 0 && (
-              <div className="space-y-4">
-                <ConversationThread messages={messages} />
-
-                {/* Render scenario chips for assistant messages */}
-                {messages.map((msg) =>
-                  msg.role === 'assistant' && msg.showScenarioChips ? (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="flex justify-start ml-11"
-                    >
-                      <ScenarioChips onScenarioSelect={handleScenarioSelect} />
-                    </motion.div>
-                  ) : null
-                )}
-
-                {/* Render follow-up suggestions for assistant messages */}
-                {messages.map((msg) =>
-                  msg.role === 'assistant' && msg.followUpSuggestions?.length ? (
-                    <motion.div
-                      key={`followup-${msg.id}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="flex justify-start ml-11"
-                    >
-                      <FollowUpSuggestions
-                        suggestions={msg.followUpSuggestions}
-                        onSuggestionClick={handleFollowUpClick}
-                      />
-                    </motion.div>
-                  ) : null
-                )}
-
-                {/* Agent Activity Timeline */}
-                {showActivityTimeline && isProcessing && (
+        {/* Conversation Workspace */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Conversation Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-8">
+            <div className="mx-auto">
+              {/* Welcome Summary - Only show if no messages */}
+              <AnimatePresence>
+                {messages.length === 0 && !welcomeSuggestionsUsed && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 ml-11"
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <AgentActivityTimeline />
+                    <WelcomeSummary />
                   </motion.div>
                 )}
+              </AnimatePresence>
 
-                <div ref={messagesEndRef} />
-              </div>
-            )}
+              {/* Suggested Questions - Show only at welcome, once */}
+              <AnimatePresence>
+                {messages.length === 0 && !welcomeSuggestionsUsed && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="mt-6"
+                  >
+                    <SuggestedQuestions 
+                      onSendMessage={(msg) => {
+                        setWelcomeSuggestionsUsed(true);
+                        handleSendMessage(msg);
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Conversation Thread */}
+              {messages.length > 0 && (
+                <div className="space-y-4 max-w-3xl">
+                  <ConversationThread messages={messages} />
+
+                  {/* Only render the LAST assistant message's scenario chips OR follow-up suggestions */}
+                  {messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && (
+                    <>
+                      {messages[messages.length - 1]?.showScenarioChips ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4 }}
+                          className="flex justify-start ml-11"
+                        >
+                          <ScenarioChips onScenarioSelect={handleScenarioSelect} />
+                        </motion.div>
+                      ) : messages[messages.length - 1]?.followUpSuggestions?.length ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4 }}
+                          className="flex justify-start ml-11"
+                        >
+                          <FollowUpSuggestions
+                            suggestions={messages[messages.length - 1]!.followUpSuggestions!}
+                            onSuggestionClick={handleFollowUpClick}
+                          />
+                        </motion.div>
+                      ) : null}
+                    </>
+                  )}
+
+                  {/* Agent Activity Timeline - Show while processing */}
+                  {showActivityTimeline && isProcessing && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-6 ml-11"
+                    >
+                      <AgentActivityTimeline />
+                    </motion.div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Quick Insight Cards - Show after first message */}
-          {messages.length > 0 && !isProcessing && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-6"
-            >
-              <QuickInsightCards onCardClick={handleQuickInsightClick} />
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      {/* Chat Input - Sticky at bottom */}
-      <div className="border-t border-border/40 bg-background/80 backdrop-blur-md sticky bottom-0">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                  e.preventDefault();
-                  handleSendMessage(inputValue);
-                }
-              }}
-              placeholder="Ask anything about your financial life..."
-              className="flex-1 px-4 py-3 rounded-lg bg-secondary text-foreground placeholder-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              disabled={isProcessing}
-            />
-            <button
-              onClick={() => handleSendMessage(inputValue)}
-              disabled={!inputValue.trim() || isProcessing}
-              className="px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+          {/* Chat Input - Sticky at bottom */}
+          <div className="border-t border-border/40 bg-background/80 backdrop-blur-md">
+            <div className="px-6 py-4">
+              <div className="flex gap-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      handleSendMessage(inputValue);
+                    }
+                  }}
+                  placeholder="Ask anything about your financial life..."
+                  className="flex-1 px-4 py-3 rounded-lg bg-secondary text-foreground placeholder-muted-foreground border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  disabled={isProcessing}
+                />
+                <button
+                  onClick={() => handleSendMessage(inputValue)}
+                  disabled={!inputValue.trim() || isProcessing}
+                  className="px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
